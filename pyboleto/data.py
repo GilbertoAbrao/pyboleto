@@ -20,7 +20,7 @@ class BoletoException(Exception):
         Exception.__init__(self, message)
 
 
-_EPOCH = datetime.date(1997, 10, 7)
+_EPOCH = datetime.date(2025, 1, 1)
 
 
 class CustomProperty(object):
