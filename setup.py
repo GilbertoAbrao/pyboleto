@@ -58,8 +58,6 @@ setup(
         'Natural Language :: Portuguese (Brazilian)',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 2.6',
         'Topic :: Office/Business :: Financial',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Framework :: Django',
@@ -67,15 +65,7 @@ setup(
     platforms='any',
     test_suite='tests.alltests.suite',
     install_requires=[
-        'distribute',
+        'setuptools',
         'reportlab'
-    ],
-    tests_require=[
-        'pylint',
-        'tox',
-        'coverage',
-        'pep8',
-        'sphinx-pypi-upload',
-        'sphinx'
     ]
 )
