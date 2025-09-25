@@ -20,7 +20,10 @@ class BoletoException(Exception):
         Exception.__init__(self, message)
 
 
-_EPOCH = datetime.date(2025, 1, 1)
+_EPOCH = datetime.date(1997, 10, 7)
+_FACTOR_RESET_DATE = datetime.date(2025, 2, 22)
+_FACTOR_RESET_OFFSET = 9000
+_MAX_FACTOR_VALUE = 9999
 
 
 class CustomProperty(object):
@@ -210,10 +213,18 @@ class BoletoData(object):
                      len(value)))
 
         due_date_days = (self.data_vencimento - _EPOCH).days
-        if not (9999 >= due_date_days >= 0):
+        if due_date_days < 0:
             raise TypeError(
-                "Invalid date, must be between 1997/07/01 and "
-                "2024/11/15")
+                "Invalid date, must be on or after 1997/10/07")
+        if due_date_days > _MAX_FACTOR_VALUE:
+            if self.data_vencimento < _FACTOR_RESET_DATE:
+                raise TypeError(
+                    "Invalid date, must be on or before 2025/02/21")
+            due_date_days -= _FACTOR_RESET_OFFSET
+            if due_date_days > _MAX_FACTOR_VALUE:
+                raise TypeError(
+                    "Invalid date, must be between 1997/10/07 and "
+                    "2049/10/13")
         num = "%s%1s%04d%010d%24s" % (self.codigo_banco,
                                       self.moeda,
                                       due_date_days,
