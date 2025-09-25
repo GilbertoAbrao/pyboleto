@@ -1,129 +1,118 @@
-========
 pyboleto
 ========
-|travis| |pypi|
+|ci| |pypi|
 
-.. |travis| image:: https://secure.travis-ci.org/eduardocereto/pyboleto.png?branch=master
-   :target: http://travis-ci.org/#!/eduardocereto/pyboleto
-   
+.. |ci| image:: https://github.com/GilbertoAbrao/pyboleto/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/GilbertoAbrao/pyboleto/actions
 .. |pypi| image:: https://img.shields.io/pypi/v/pyboleto.svg
-    :target: https://pypi.python.org/pypi/pyboleto/
- 
+   :target: https://pypi.python.org/pypi/pyboleto/
 
 .. _pyboleto-synopsis:
 
-pyboleto provides a python class to generate "boletos de cobranca" as these
-are the Brazilian equivalent for invoices.
+``pyboleto`` provides a Python toolbox for generating *boletos de cobrança*,
+the Brazilian equivalent of invoices. It remains easy to extend for new banks
+and custom issuing rules.
 
-It's easy to implement classes for new banks.
-
-This class is still in development and currently has no documented API.
+Recent Highlights
+=================
+- Atualizei o cálculo do fator de vencimento para refletir a orientação da
+  FEBRABAN: a contagem reinicia em 1000 a partir de 22/02/2025 sem quebrar os
+  boletos anteriores a essa data.
+- Restabeleci a data base original (07/10/1997) e adicionei validações mais
+  claras nas mensagens de erro para facilitar a depuração.
+- Introduzi constantes nomeadas para controlar o reset do fator de vencimento,
+  preparando o código para futuras revisões pelas instituições financeiras.
 
 .. contents::
-    :local:
+   :local:
 
 .. _pyboleto-implemented-bank:
 
 Implemented Banks
 =================
-
-You can help writing code for more banks or printing and testing current
-implementations.
+You can help by implementing additional banks or by testing the current ones.
 
 For now here's where we are.
 
- +----------------------+----------------+-----------------+------------+
- | **Bank**             | **Carteira /** | **Implemented** | **Tested** |
- |                      | **Convenio**   |                 |            |
- +======================+================+=================+============+
- | **Banco do Brasil**  | 18             | Yes             | Yes        |
- +----------------------+----------------+-----------------+------------+
- | **Banrisul**         | x              | Yes             | Yes        |
- +----------------------+----------------+-----------------+------------+
- | **Bradesco**         | 06, 03         | Yes             | Yes        |
- +----------------------+----------------+-----------------+------------+
- | **Caixa Economica**  | SR             | Yes             | No         |
- +----------------------+----------------+-----------------+------------+
- | **HSBC**             | CNR, CSB       | Yes             | No         |
- +----------------------+----------------+-----------------+------------+
- | **Itau**             | 157            | Yes             | Yes        |
- +----------------------+----------------+-----------------+------------+
- | **Itau**             | 175, 174, 178, | Yes             | No         |
- |                      | 104, 109       |                 |            |
- +----------------------+----------------+-----------------+------------+
- | **Real**             | 57             | Yes             | No         |
- +----------------------+----------------+-----------------+------------+
- | **Santander**        | 102            | Yes             | Yes        |
- +----------------------+----------------+-----------------+------------+
- | **Santander**        | 101, 201       | Yes             | No         |
- +----------------------+----------------+-----------------+------------+
++----------------------+----------------+-----------------+------------+
+| **Bank**             | **Carteira /** | **Implemented** | **Tested** |
+|                      | **Convênio**   |                 |            |
++======================+================+=================+============+
+| **Banco do Brasil**  | 18             | Yes             | Yes        |
++----------------------+----------------+-----------------+------------+
+| **Banrisul**         | x              | Yes             | Yes        |
++----------------------+----------------+-----------------+------------+
+| **Bradesco**         | 06, 03         | Yes             | Yes        |
++----------------------+----------------+-----------------+------------+
+| **Caixa Econômica**  | SR             | Yes             | No         |
++----------------------+----------------+-----------------+------------+
+| **HSBC**             | CNR, CSB       | Yes             | No         |
++----------------------+----------------+-----------------+------------+
+| **Itaú**             | 157            | Yes             | Yes        |
++----------------------+----------------+-----------------+------------+
+| **Itaú**             | 175, 174, 178, | Yes             | No         |
+|                      | 104, 109       |                 |            |
++----------------------+----------------+-----------------+------------+
+| **Real**             | 57             | Yes             | No         |
++----------------------+----------------+-----------------+------------+
+| **Santander**        | 102            | Yes             | Yes        |
++----------------------+----------------+-----------------+------------+
+| **Santander**        | 101, 201       | Yes             | No         |
++----------------------+----------------+-----------------+------------+
 
 .. _pyboleto-docs:
 
 Documentation
 =============
+https://github.com/GilbertoAbrao/pyboleto/wiki
 
-http://packages.python.org/pyboleto/
-
-The best way to learn how to create Boletos using pyboleto is to look at the
-examples at `pdf_pyboleto_sample.py`_ or `html_pyboleto_sample.py`_
-
-
-.. _pdf_pyboleto_sample.py: https://github.com/eduardocereto/pyboleto/blob/master/bin/pdf_pyboleto_sample.py
-
-.. _html_pyboleto_sample.py: https://github.com/eduardocereto/pyboleto/blob/master/bin/html_pyboleto_sample.py
+The quickest way to learn how to create boletos is to review the examples in
+``bin/pdf_pyboleto_sample.py`` or ``bin/html_pyboleto_sample.py`` inside this
+repository.
 
 .. _pyboleto-installation:
 
 Installation
 ============
+You can install ``pyboleto`` either via the Python Package Index (PyPI) or from
+source.
 
-You can install pyboleto either via the Python Package Index (PyPI)
-or from source.
-
-To install using pip,::
+To install using pip::
 
     $ pip install pyboleto
 
-To install using easy_install,::
+To install using easy_install::
 
     $ easy_install pyboleto
-
 
 .. _pyboleto-installing-from-source:
 
 Downloading and installing from source
 --------------------------------------
+Download the latest version of ``pyboleto`` from
+https://pypi.python.org/pypi/pyboleto/ or clone the repository::
 
-Download the latest version of pyboleto from
-http://pypi.python.org/pypi/pyboleto/
+    $ git clone https://github.com/GilbertoAbrao/pyboleto.git
+    $ cd pyboleto
+    $ python -m venv .venv && source .venv/bin/activate
+    $ pip install -e .
 
-You can install it by doing the following,::
+If you prefer the source distribution::
 
-    $ tar xvfz pyboleto-0.0.0.tar.gz
-    $ cd pyboleto-0.0.0
+    $ tar xvfz pyboleto-<version>.tar.gz
+    $ cd pyboleto-<version>
     $ python setup.py build
-    # python setup.py install # as root
-
-.. _pyboleto-installing-from-hg:
-
-Using the development version
------------------------------
-
-You can clone the repository by doing the following::
-
-    $ git clone https://github.com/eduardocereto/pyboleto.git
+    # python setup.py install  # as root
 
 .. _pyboleto-unittests:
 
-Executing unittests
-===================
-
-You need either setuptools or distribute in order to execute the tests. Chances are you already have one or another. You also need `pdftohtml`_.::
+Executing tests
+===============
+You need ``setuptools`` (or ``distribute``) in order to execute the tests.
+``pdftohtml``_ is required for the PDF fixtures used by the sample suite::
 
     $ cd pyboleto
     $ python setup.py test
-
 
 .. _pdftohtml: http://poppler.freedesktop.org/
 
@@ -131,8 +120,6 @@ You need either setuptools or distribute in order to execute the tests. Chances 
 
 License
 =======
+This software is licensed under the `New BSD License`. See the ``LICENSE`` file
+in the root of the repository for the full license text.
 
-This software is licensed under the `New BSD License`. See the ``LICENSE``
-file in the top distribution directory for the full license text.
-
-.. vim:tw=0:sw=4:et
