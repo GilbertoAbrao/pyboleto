@@ -127,6 +127,18 @@ class BoletoHTML(object):
         for dm in boletoDados.demonstrativo:
             tpl_data['demonstrativo'] += '<p>{0}</p>'.format(dm)
 
+        # QRCode
+        tpl_data['qrcode_img'] = ''
+        if boletoDados.qrcode_base64:
+            # Assume que já vem com o prefixo data:image/png;base64,
+            if boletoDados.qrcode_base64.startswith('data:image'):
+                qrcode_data = boletoDados.qrcode_base64
+            else:
+                qrcode_data = 'data:image/png;base64,{0}'.format(
+                    boletoDados.qrcode_base64
+                )
+            tpl_data['qrcode_img'] = '<img src="{0}" alt="QR Code" style="width:100%; max-width:150px;" />'.format(qrcode_data)
+
         self.html += tpl.substitute(tpl_data)
 
     def _drawHorizontalCorteLine(self):
@@ -194,6 +206,18 @@ class BoletoHTML(object):
 
         # Código de barras
         tpl_data['barcode'] = self._codigoBarraI25(boletoDados.barcode)
+
+        # QRCode
+        tpl_data['qrcode_img'] = ''
+        if boletoDados.qrcode_base64:
+            # Assume que já vem com o prefixo data:image/png;base64,
+            if boletoDados.qrcode_base64.startswith('data:image'):
+                qrcode_data = boletoDados.qrcode_base64
+            else:
+                qrcode_data = 'data:image/png;base64,{0}'.format(
+                    boletoDados.qrcode_base64
+                )
+            tpl_data['qrcode_img'] = '<img src="{0}" alt="QR Code" style="width:100%; max-width:150px;" />'.format(qrcode_data)
 
         self.html += tpl.substitute(tpl_data)
 
