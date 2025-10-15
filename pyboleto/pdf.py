@@ -548,7 +548,7 @@ class BoletoPDF(object):
         if boleto_dados.qrcode_base64:
             qrcode_size = 25 * mm
             qrcode_x = self.width - (45 * mm) - qrcode_size - (2 * mm)
-            qrcode_y = y + self.space - (30 * mm)
+            qrcode_y = y + self.space - (20 * mm)
             self._drawQRCode(
                 boleto_dados.qrcode_base64,
                 qrcode_x,
