@@ -10,6 +10,8 @@
 
 """
 import os
+import base64
+from io import BytesIO
 
 from reportlab.graphics.barcode.common import I2of5
 from reportlab.lib.colors import black
@@ -17,6 +19,7 @@ from reportlab.lib.pagesizes import A4, landscape as pagesize_landscape
 from reportlab.lib.units import mm, cm
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 
 
 class BoletoPDF(object):
@@ -398,6 +401,19 @@ class BoletoPDF(object):
 
         self.pdf_canvas.setFont('Helvetica', 9)
 
+        # Desenha QRCode se disponível
+        if boleto_dados.qrcode_base64:
+            qrcode_size = 25 * mm
+            qrcode_x = self.width - qrcode_size - (2 * mm)
+            qrcode_y = (linha_inicial + 0) * self.height_line + self.space
+            self._drawQRCode(
+                boleto_dados.qrcode_base64,
+                qrcode_x,
+                qrcode_y,
+                qrcode_size,
+                qrcode_size
+            )
+
         self.pdf_canvas.restoreState()
 
         return (self.width, ((linha_inicial + 3) * self.height_line))
@@ -527,6 +543,19 @@ class BoletoPDF(object):
                 instrucoes[i]
             )
         self.pdf_canvas.setFont('Helvetica', self.font_size_title)
+
+        # Desenha QRCode na área de instruções se disponível
+        if boleto_dados.qrcode_base64:
+            qrcode_size = 30 * mm
+            qrcode_x = self.width - (45 * mm) - qrcode_size - (2 * mm)
+            qrcode_y = y + self.space
+            self._drawQRCode(
+                boleto_dados.qrcode_base64,
+                qrcode_x,
+                qrcode_y,
+                qrcode_size,
+                qrcode_size
+            )
 
         # Linha horizontal com primeiro campo Uso do Banco
         y += self.height_line
@@ -874,6 +903,41 @@ class BoletoPDF(object):
         bc.__init__(num, barWidth=thin_bar)
 
         bc.drawOn(self.pdf_canvas, x, y)
+
+    def _drawQRCode(self, qrcode_base64, x, y, width, height):
+        """Desenha QRCode a partir de uma string base64
+
+        :param qrcode_base64: String base64 da imagem do QRCode
+        :param x: Posição X
+        :param y: Posição Y
+        :param width: Largura da imagem
+        :param height: Altura da imagem
+        """
+        if not qrcode_base64:
+            return
+
+        try:
+            # Remove o prefixo data:image se existir
+            if qrcode_base64.startswith('data:image'):
+                qrcode_base64 = qrcode_base64.split(',', 1)[1]
+
+            # Decodifica o base64
+            qrcode_bytes = base64.b64decode(qrcode_base64)
+            qrcode_buffer = BytesIO(qrcode_bytes)
+
+            # Cria ImageReader e desenha no canvas
+            qrcode_image = ImageReader(qrcode_buffer)
+            self.pdf_canvas.drawImage(
+                qrcode_image,
+                x, y,
+                width, height,
+                preserveAspectRatio=True,
+                anchor='c',
+                mask='auto'
+            )
+        except Exception as e:
+            # Se falhar ao desenhar o QRCode, apenas ignora
+            pass
 
 
 def load_image(logo_image):
