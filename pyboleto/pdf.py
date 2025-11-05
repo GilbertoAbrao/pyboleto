@@ -386,27 +386,23 @@ class BoletoPDF(object):
         )
         if boleto_dados.qrcode_link:
             max_width = self.width - (30 * mm) - (2 * self.space)
-            link_font_size = self._fit_text_font_size(
-                boleto_dados.qrcode_link,
-                max_width,
-                font_name='Helvetica',
-                initial_size=self.font_size_value,
-                min_size=5
-            )
-            link_line_height = link_font_size + 1
+            link_font_size = 8  # um pouco menor que os demais campos
+            link_line_height = link_font_size + 2
+            link_top_offset = 1.5 * mm  # distância extra da linha superior
             self.pdf_canvas.setFont('Helvetica', link_font_size)
-            link_text = self._truncate_text_to_width(
+            link_lines = self._wrap_text(
                 boleto_dados.qrcode_link,
-                'Helvetica',
-                link_font_size,
-                max_width
+                font_name='Helvetica',
+                font_size=link_font_size,
+                max_width=max_width
             )
-            self.pdf_canvas.drawString(
-                self.space,
-                (((linha_inicial + 0) * self.height_line)) + self.space -
-                link_line_height,
-                link_text
-            )
+            for index, line in enumerate(link_lines):
+                self.pdf_canvas.drawString(
+                    self.space,
+                    (((linha_inicial + 0) * self.height_line)) + self.space -
+                    link_top_offset - (index + 1) * link_line_height,
+                    line
+                )
             self.pdf_canvas.setFont('Helvetica', 9)
         self.pdf_canvas.drawString(
             self.width - (30 * mm) + self.space,
@@ -928,40 +924,67 @@ class BoletoPDF(object):
 
         bc.drawOn(self.pdf_canvas, x, y)
 
-    def _fit_text_font_size(self, text, max_width, font_name='Helvetica',
-                             initial_size=9, min_size=5):
-        """Reduz o tamanho da fonte até o texto caber na largura desejada."""
-        if not text or max_width <= 0:
-            return initial_size
+    def _wrap_text(self, text, font_name='Helvetica', font_size=9,
+                   max_width=None):
+        """Quebra texto em múltiplas linhas respeitando a largura máxima."""
+        if not text:
+            return []
 
-        size = initial_size
-        while size > min_size and stringWidth(text, font_name, size) > max_width:
-            size -= 0.5
+        if max_width is None:
+            max_width = self.width
 
-        return max(size, min_size)
+        lines = []
+        paragraphs = text.splitlines() or [text]
 
-    def _truncate_text_to_width(self, text, font_name, font_size, max_width):
-        """Trunca texto adicionando reticências para respeitar a largura."""
-        if not text or max_width <= 0:
-            return ''
+        for paragraph in paragraphs:
+            words = paragraph.split()
+            if not words:
+                lines.append('')
+                continue
 
-        if stringWidth(text, font_name, font_size) <= max_width:
-            return text
+            current_line = ''
+            for word in words:
+                candidate = word if not current_line else current_line + ' ' + word
+                if stringWidth(candidate, font_name, font_size) <= max_width:
+                    current_line = candidate
+                    continue
 
-        ellipsis = '...'
-        ellipsis_width = stringWidth(ellipsis, font_name, font_size)
-        if ellipsis_width >= max_width:
-            return ellipsis
+                if current_line:
+                    lines.append(current_line)
+                    current_line = ''
 
-        available_width = max_width - ellipsis_width
-        truncated = ''
-        for char in text:
-            candidate = truncated + char
-            if stringWidth(candidate, font_name, font_size) > available_width:
-                break
-            truncated = candidate
+                if stringWidth(word, font_name, font_size) <= max_width:
+                    current_line = word
+                    continue
 
-        return truncated + ellipsis
+                oversized_parts = self._split_word_by_width(
+                    word, font_name, font_size, max_width
+                )
+                if oversized_parts:
+                    lines.extend(oversized_parts[:-1])
+                    current_line = oversized_parts[-1]
+
+            if current_line:
+                lines.append(current_line)
+
+        return lines
+
+    def _split_word_by_width(self, word, font_name, font_size, max_width):
+        """Divide palavras sem espaços para evitar corte no PDF."""
+        segments = []
+        current = ''
+        for char in word:
+            candidate = current + char
+            if current and stringWidth(candidate, font_name, font_size) > max_width:
+                segments.append(current)
+                current = char
+            else:
+                current = candidate
+
+        if current:
+            segments.append(current)
+
+        return segments
 
     def _drawQRCode(self, qrcode_base64, x, y, width, height):
         """Desenha QRCode a partir de uma string base64
