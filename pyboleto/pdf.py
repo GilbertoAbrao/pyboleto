@@ -386,9 +386,17 @@ class BoletoPDF(object):
         )
         if boleto_dados.qrcode_link:
             max_width = self.width - (30 * mm) - (2 * self.space)
-            link_font_size = 8  # um pouco menor que os demais campos
+            link_font_size = self.font_size_value * 0.7
             link_line_height = link_font_size + 2
             link_top_offset = 1.5 * mm  # distância extra da linha superior
+            base_row = (linha_inicial + 0) * self.height_line
+            label_y = base_row - link_top_offset - link_line_height + self.delta_title
+            self.pdf_canvas.setFont('Helvetica', self.font_size_title)
+            self.pdf_canvas.drawString(
+                0,
+                label_y,
+                'QrCode'
+            )
             self.pdf_canvas.setFont('Helvetica', link_font_size)
             link_lines = self._wrap_text(
                 boleto_dados.qrcode_link,
