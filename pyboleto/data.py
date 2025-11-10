@@ -166,6 +166,7 @@ class BoletoData(object):
         self.sacado_bairro = kwargs.pop('sacado_bairro', "")
         self.sacado_cep = kwargs.pop('sacado_cep', "")
         self.qrcode_base64 = kwargs.pop('qrcode_base64', "")
+        self.qrcode_link = kwargs.pop('qrcode_link', "")
         if kwargs:
             raise TypeError("Paramêtro(s) desconhecido: %r" % (kwargs, ))
         self._cedente_endereco = None

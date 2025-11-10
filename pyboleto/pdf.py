@@ -384,6 +384,26 @@ class BoletoPDF(object):
             (((linha_inicial + 0) * self.height_line)) + self.space,
             boleto_dados.cedente_endereco
         )
+        if boleto_dados.qrcode_link:
+            max_width = self.width - (30 * mm) - (2 * self.space)
+            link_font_size = self.font_size_value * 0.7
+            link_line_height = link_font_size + 2
+            link_top_offset = 1.5 * mm  # distância extra da linha superior
+            self.pdf_canvas.setFont('Helvetica', link_font_size)
+            link_lines = self._wrap_text(
+                boleto_dados.qrcode_link,
+                font_name='Helvetica',
+                font_size=link_font_size,
+                max_width=max_width
+            )
+            for index, line in enumerate(link_lines):
+                self.pdf_canvas.drawString(
+                    self.space,
+                    (((linha_inicial + 0) * self.height_line)) + self.space -
+                    link_top_offset - (index + 1) * link_line_height,
+                    line
+                )
+            self.pdf_canvas.setFont('Helvetica', 9)
         self.pdf_canvas.drawString(
             self.width - (30 * mm) + self.space,
             (((linha_inicial + 0) * self.height_line)) + self.space,
@@ -903,6 +923,68 @@ class BoletoPDF(object):
         bc.__init__(num, barWidth=thin_bar)
 
         bc.drawOn(self.pdf_canvas, x, y)
+
+    def _wrap_text(self, text, font_name='Helvetica', font_size=9,
+                   max_width=None):
+        """Quebra texto em múltiplas linhas respeitando a largura máxima."""
+        if not text:
+            return []
+
+        if max_width is None:
+            max_width = self.width
+
+        lines = []
+        paragraphs = text.splitlines() or [text]
+
+        for paragraph in paragraphs:
+            words = paragraph.split()
+            if not words:
+                lines.append('')
+                continue
+
+            current_line = ''
+            for word in words:
+                candidate = word if not current_line else current_line + ' ' + word
+                if stringWidth(candidate, font_name, font_size) <= max_width:
+                    current_line = candidate
+                    continue
+
+                if current_line:
+                    lines.append(current_line)
+                    current_line = ''
+
+                if stringWidth(word, font_name, font_size) <= max_width:
+                    current_line = word
+                    continue
+
+                oversized_parts = self._split_word_by_width(
+                    word, font_name, font_size, max_width
+                )
+                if oversized_parts:
+                    lines.extend(oversized_parts[:-1])
+                    current_line = oversized_parts[-1]
+
+            if current_line:
+                lines.append(current_line)
+
+        return lines
+
+    def _split_word_by_width(self, word, font_name, font_size, max_width):
+        """Divide palavras sem espaços para evitar corte no PDF."""
+        segments = []
+        current = ''
+        for char in word:
+            candidate = current + char
+            if current and stringWidth(candidate, font_name, font_size) > max_width:
+                segments.append(current)
+                current = char
+            else:
+                current = candidate
+
+        if current:
+            segments.append(current)
+
+        return segments
 
     def _drawQRCode(self, qrcode_base64, x, y, width, height):
         """Desenha QRCode a partir de uma string base64
